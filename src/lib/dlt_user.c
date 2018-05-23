@@ -1356,7 +1356,14 @@ DltReturnValue dlt_forward_msg(void *msgdata,size_t size)
         if (ret < DLT_RETURN_OK)
         {
             DLT_SEM_LOCK();
-
+		
+	    if(ret == DLT_RETURN_PIPE_ERROR)
+            {
+            	/* handle not open or pipe error */
+            	   close(dlt_user.dlt_log_handle);
+            	   dlt_user.dlt_log_handle = -1;
+            }
+		
             if (dlt_buffer_push3(&(dlt_user.startup_buffer),
                                 (unsigned char *)&(userheader), sizeof(DltUserHeader),
                                  msgdata, size, 0, 0) == DLT_RETURN_ERROR)
@@ -3628,6 +3635,13 @@ DltReturnValue dlt_user_log_send_log(DltContextData *log, int mtype)
         if ((ret!=DLT_RETURN_OK) || (dlt_user.appID[0] == '\0'))
         {
             DLT_SEM_LOCK();
+		
+	    if(ret == DLT_RETURN_PIPE_ERROR)
+            {
+            	/* handle not open or pipe error */
+            	   close(dlt_user.dlt_log_handle);
+            	   dlt_user.dlt_log_handle = -1;
+            }
 
             if (dlt_buffer_push3(&(dlt_user.startup_buffer),
                                 (unsigned char *)&(userheader), sizeof(DltUserHeader),
